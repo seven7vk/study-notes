@@ -1,0 +1,389 @@
+我来直接输出两个文档。
+
+---
+
+## 一、项目代码结构
+
+```
+project-name/
+├── src/main/java/com/company/project/
+│   │
+│   ├── config/                          # 配置类
+│   │   ├── MybatisPlusConfig.java
+│   │   ├── RedisConfig.java
+│   │   └── WebMvcConfig.java
+│   │
+│   ├── common/                          # 公共组件（禁止放业务代码）
+│   │   ├── result/
+│   │   │   ├── Result.java              # 统一返回体
+│   │   │   └── ResultCode.java          # 响应码枚举
+│   │   ├── exception/
+│   │   │   ├── BizException.java        # 业务异常
+│   │   │   └── GlobalExceptionHandler.java
+│   │   └── utils/
+│   │       ├── DateUtils.java
+│   │       └── StringUtils.java
+│   │
+│   ├── domain/                          # 数据模型（纯POJO，零业务逻辑）
+│   │   ├── entity/                      # 数据库映射实体
+│   │   │   └── UserEntity.java
+│   │   ├── dto/                         # Service层传输对象
+│   │   │   ├── UserCreateDTO.java
+│   │   │   └── UserQueryDTO.java
+│   │   ├── vo/                          # Controller层返回给前端
+│   │   │   └── UserVO.java
+│   │   └── enums/                       # 业务枚举
+│   │       └── UserStatusEnum.java
+│   │
+│   ├── controller/                      # 接口层
+│   │   └── UserController.java
+│   │
+│   ├── service/                         # 业务逻辑层
+│   │   ├── UserService.java             # 接口
+│   │   └── impl/
+│   │       └── UserServiceImpl.java
+│   │
+│   ├── manager/                         # 通用业务层（组合逻辑/防腐层）
+│   │   └── UserManager.java
+│   │
+│   ├── repository/                      # 数据访问封装层
+│   │   ├── UserRepository.java          # 封装Mapper，供Service调用
+│   │   └── mapper/
+│   │       └── UserMapper.java          # MyBatis接口，禁止跨层直调
+│   │
+│   └── ProjectApplication.java
+│   │
+│   ├── integration/                      # ★ 第三方集成层（新增）
+│   │   ├── wechat/                       # 按第三方服务分包
+│   │   │   ├── WechatPayClient.java      # 封装HTTP调用
+│   │   │   ├── WechatPayService.java     # 业务语义化封装
+│   │   │   └── dto/                     # 第三方专用DTO
+│   │   │       ├── WechatPayRequest.java
+│   │   │       └── WechatPayResponse.java
+│   │   ├── sms/
+│   │   │   ├── SmsClient.java
+│   │   │   └── SmsService.java
+│   │   └── map/
+│   │       └── ...
+│   │
+│   ├── facade/                           # ★ 对外暴露层（新增）
+│   │   ├── UserFacade.java               # 接口定义
+│   │   └── impl/
+│   │       └── UserFacadeImpl.java       # 接口实现
+│   │
+│
+├── src/main/resources/
+│   ├── mapper/                          # XML SQL文件
+│   │   └── UserMapper.xml
+│   ├── application.yml
+│   ├── application-dev.yml
+│   └── application-prod.yml
+│
+└── src/test/                            # 单元测试（与主代码结构对应）
+```
+
+**调用链（强制遵守，不得跨层）：**
+```
+Controller → Service → Manager → Repository → Mapper
+                ↓
+           （可直接）Repository
+
+标准链路：
+Controller → Service → Repository
+
+复杂场景：
+Controller → Service → Manager → Repository
+```
+
+---
+
+## 二、团队开发规范文档
+
+---
+
+# 项目开发规范 v1.0
+
+> 本规范为强制执行标准，Code Review 不符合规范的代码不得合并。
+
+---
+
+### 1. 分层职责规范
+
+| 层级 | 职责 | 禁止事项 |
+|---|---|---|
+| Controller | 参数校验、调Service、组装VO返回 | 禁止写业务逻辑、禁止直调Mapper/Repository |
+| Service | 核心业务逻辑 | 禁止直调Mapper、禁止写SQL | 对外提供业务能力 | 组织流程（编排）
+| Manager | 多Service组合、外部接口封装 | 禁止写Controller逻辑 |
+| Repository | 封装Mapper，提供语义化方法 | 禁止写业务判断 |
+| Mapper | 数据库操作 | 禁止被Controller/Service直接调用 |
+
+---
+
+### 2. 命名规范
+
+**类命名：**
+```
+UserController       接口层
+UserService          业务接口
+UserServiceImpl      业务实现
+UserManager          通用业务层
+UserRepository       数据封装层
+UserMapper           数据库接口
+UserEntity           数据库实体
+UserDTO              请求/传输对象（含场景前缀：UserCreateDTO）
+UserVO               返回视图对象
+UserStatusEnum       枚举
+```
+
+**方法命名：**
+```java
+// 查询
+getUserById()、listUserByStatus()、pageUser()
+
+// 新增
+createUser()、addUser()
+
+// 修改
+updateUser()、modifyUserStatus()
+
+// 删除
+deleteUser()、removeUserById()
+
+// 校验/判断
+checkUserExists()、isUserActive()
+```
+
+**数据库表命名：**
+```
+表名：小写下划线，t_ 开头        如：t_user、t_order_item
+字段：小写下划线                  如：create_time、user_status
+必备字段：id、create_time、update_time、is_deleted（逻辑删除）
+```
+
+---
+
+### 3. 统一返回与异常规范
+
+**统一返回结构（所有接口必须使用）：**
+```java
+@Data
+public class Result<T> {
+    private Integer code;
+    private String message;
+    private T data;
+
+    public static <T> Result<T> success(T data) {
+        return new Result<>(200, "success", data);
+    }
+
+    public static <T> Result<T> fail(String message) {
+        return new Result<>(500, message, null);
+    }
+}
+```
+
+**业务异常使用方式：**
+```java
+// 抛出
+throw new BizException("用户不存在");
+throw new BizException(ResultCode.USER_NOT_FOUND);
+
+// 禁止直接返回 null，必须抛异常或返回空对象
+// 禁止在Controller里写 try-catch，统一由GlobalExceptionHandler处理
+```
+
+---
+
+### 4. DTO / VO / Entity 使用规范
+
+- **Entity 禁止直接返回给前端**，必须转为 VO
+- **转换工具统一使用 MapStruct**，禁止手写 getter/setter 赋值
+- 命名要体现场景：`UserCreateDTO`、`UserUpdateDTO`、`UserQueryDTO`
+
+```java
+// 正确示例
+@Mapper(componentModel = "spring")
+public interface UserConverter {
+    UserVO toVO(UserEntity entity);
+    UserEntity toEntity(UserCreateDTO dto);
+}
+
+// 错误示例（禁止）
+UserVO vo = new UserVO();
+vo.setName(entity.getName());
+vo.setAge(entity.getAge());
+// ... 手动赋值
+```
+
+---
+
+### 5. Service 层编写规范
+
+```java
+@Service
+@RequiredArgsConstructor
+public class UserServiceImpl implements UserService {
+
+    private final UserRepository userRepository;
+    private final UserConverter userConverter;
+
+    @Override
+    public UserVO getUserById(Long id) {
+        // 1. 查询数据
+        UserEntity entity = userRepository.getById(id);
+        // 2. 业务校验
+        if (entity == null) {
+            throw new BizException("用户不存在");
+        }
+        // 3. 转换返回
+        return userConverter.toVO(entity);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void createUser(UserCreateDTO dto) {
+        // 涉及写操作必须加 @Transactional
+    }
+}
+```
+
+**强制要求：**
+- 涉及数据库写操作，必须加 `@Transactional(rollbackFor = Exception.class)`
+- 方法内逻辑超过 50 行，必须拆分私有方法或下沉到 Manager
+- 禁止在循环中调用数据库
+
+---
+
+### 6. Controller 层编写规范
+
+```java
+@RestController
+@RequestMapping("/api/v1/user")
+@RequiredArgsConstructor
+@Validated
+public class UserController {
+
+    private final UserService userService;
+
+    @GetMapping("/{id}")
+    public Result<UserVO> getUser(@PathVariable Long id) {
+        return Result.success(userService.getUserById(id));
+    }
+
+    @PostMapping
+    public Result<Void> createUser(@RequestBody @Valid UserCreateDTO dto) {
+        userService.createUser(dto);
+        return Result.success(null);
+    }
+}
+```
+
+**强制要求：**
+- 接口路径统一 `/api/v1/模块名`
+- 参数校验用 `@Valid` + JSR-303注解，禁止在方法体内手动 if 判断非空
+- Controller 方法体不超过 10 行
+
+---
+
+### 7. Git 提交规范
+
+**分支规范：**
+```
+main          生产环境，禁止直接推送
+develop       开发主分支
+feature/xxx   功能开发分支，完成后合并到develop
+hotfix/xxx    紧急修复分支
+```
+
+**Commit Message 格式：**
+```
+feat: 新增用户登录功能
+fix: 修复用户查询空指针问题
+refactor: 重构订单Service层逻辑
+docs: 更新接口文档
+style: 代码格式调整
+```
+
+**PR/MR 规范：**
+- 每次提交只做一件事，禁止大杂烩提交
+- 合并前必须经过至少 1 人 Code Review
+- 禁止将 `System.out.println` / 调试代码合并到 develop
+
+---
+
+### 8. 日志规范
+
+```java
+// 统一使用 Slf4j，禁止使用 System.out
+@Slf4j
+public class UserServiceImpl {
+
+    public void createUser(UserCreateDTO dto) {
+        log.info("创建用户，入参：{}", dto);
+        // ...
+        log.info("创建用户成功，userId：{}", userId);
+    }
+}
+```
+
+**日志级别约定：**
+- `INFO`：关键业务节点（进入方法、操作成功）
+- `WARN`：业务异常、数据异常但不影响主流程
+- `ERROR`：系统异常，必须打印完整堆栈 `log.error("msg", e)`
+
+---
+
+### 9. Code Review 检查清单
+
+提交 MR 前自查，Review 时逐项核对：
+
+- [ ] 是否遵守分层调用链，无跨层调用
+- [ ] Entity 是否未直接返回给前端
+- [ ] 写操作是否加了 `@Transactional`
+- [ ] 是否有循环内调数据库
+- [ ] 异常是否统一用 `BizException` 抛出
+- [ ] 是否有 `System.out` 或无意义注释代码
+- [ ] 方法、变量命名是否符合规范
+- [ ] 日志是否打了关键节点
+
+---
+
+> 规范会随项目演进持续更新，有疑问或建议直接找负责人讨论修改，**规范是为了降低协作成本，不是为了制造障碍**。
+
+---
+
+
+Manager 层只允许做：
+✔ 跨 Service 组合
+✔ 外部系统调用封装
+
+Manager 禁止做：
+❌ 单表 CRUD
+❌ 简单业务逻辑
+❌ 直接调用 Mapper
+
+只依赖一个 Repository
+
+👉 ❌ 不允许写在 Manager
+👉 ✅ 必须写在 Service
+
+两个文档都可以直接复制使用。建议把开发规范放进项目根目录的 `docs/开发规范.md`，让每个成员在第一天就读一遍。有需要调整的部分告诉我。
+
+controller   → 接口层
+service      → 编排 + 对外能力
+manager      → 跨模块组合（可选）
+repository   → 数据访问
+domain       → 实体 + 轻业务逻辑 ⭐（关键升级）
+integration  → 外部系统适配（可选）
+
+✅ 规则1：禁止“横向越层调用”
+❌ Controller → Repository
+❌ Service → Mapper
+❌ Manager → Mapper
+✅ 规则2：禁止“DTO穿透”
+❌ Controller DTO → Repository
+❌ Entity → Controller
+✅ 规则3：方法复杂度限制（非常有效）
+方法超过：
+- 50行 → 必须拆
+- 3层if嵌套 → 必须重构

@@ -1,0 +1,165 @@
+好问题，这两个场景很常见，分开说清楚。
+
+---
+
+## 两个场景，两个方向
+
+**场景一：调用第三方服务**（我方作为调用方）
+比如：调用微信支付、短信服务、地图API、其他内部系统
+
+**场景二：暴露接口给其他服务调用**（我方作为提供方）
+比如：给其他业务系统提供 RPC 接口、给合作方提供 Open API
+
+---
+
+## 目录结构扩展
+
+```
+project-name/
+├── src/main/java/com/company/project/
+│   │
+│   ├── controller/
+│   │   ├── UserController.java           # 给前端的接口（内部）
+│   │   └── open/                         # 暴露给外部系统的接口
+│   │       └── UserOpenController.java
+│   │
+│   ├── service/
+│   ├── manager/
+│   │
+│   ├── integration/                      # ★ 第三方集成层（新增）
+│   │   ├── wechat/                       # 按第三方服务分包
+│   │   │   ├── WechatPayClient.java      # 封装HTTP调用
+│   │   │   ├── WechatPayService.java     # 业务语义化封装
+│   │   │   └── dto/                     # 第三方专用DTO
+│   │   │       ├── WechatPayRequest.java
+│   │   │       └── WechatPayResponse.java
+│   │   ├── sms/
+│   │   │   ├── SmsClient.java
+│   │   │   └── SmsService.java
+│   │   └── map/
+│   │       └── ...
+│   │
+│   ├── facade/                           # ★ 对外暴露层（新增）
+│   │   ├── UserFacade.java               # 接口定义
+│   │   └── impl/
+│   │       └── UserFacadeImpl.java       # 接口实现
+│   │
+│   ├── repository/
+│   └── ...
+```
+
+---
+
+## 设计细节说明
+
+### integration 层 —— 调用第三方
+
+分两个类职责要分清：
+
+```java
+// 1. Client：只负责 HTTP 通信，不含业务逻辑
+@Component
+public class WechatPayClient {
+
+    public WechatPayResponse doUnifiedOrder(WechatPayRequest request) {
+        // 只做：签名、发请求、解析响应、处理超时重试
+        // 不做任何业务判断
+    }
+}
+
+// 2. Service：语义化封装，供内部 Manager/Service 调用
+@Service
+@RequiredArgsConstructor
+public class WechatPayService {
+
+    private final WechatPayClient wechatPayClient;
+
+    // 对内暴露语义清晰的方法，屏蔽第三方细节
+    public String createPayOrder(Long orderId, BigDecimal amount) {
+        WechatPayRequest request = buildRequest(orderId, amount);
+        WechatPayResponse response = wechatPayClient.doUnifiedOrder(request);
+        // 处理第三方返回的异常码，统一转成内部 BizException
+        if (!"SUCCESS".equals(response.getReturnCode())) {
+            throw new BizException("创建支付订单失败：" + response.getReturnMsg());
+        }
+        return response.getPrepayId();
+    }
+}
+```
+
+**调用链：**
+```
+Service/Manager → integration.XxxService → integration.XxxClient → 第三方API
+```
+
+> integration 层的核心价值是**防腐**：第三方接口改了，只改这一层，业务代码不动。
+
+---
+
+### facade 层 —— 暴露给其他服务
+
+```java
+// 接口定义（可作为 SDK 对外输出）
+public interface UserFacade {
+    UserDTO getUserById(Long id);
+    Boolean checkUserExists(String mobile);
+}
+
+// 实现：复用内部 Service，做数据裁剪，不暴露内部实现细节
+@Service
+@RequiredArgsConstructor
+public class UserFacadeImpl implements UserFacade {
+
+    private final UserService userService;
+
+    @Override
+    public UserDTO getUserById(Long id) {
+        // 注意：返回的是 DTO 不是 Entity，控制数据边界
+        return userService.getUserById(id);
+    }
+}
+```
+
+**如果是 HTTP Open API，配合 controller/open 目录：**
+```java
+@RestController
+@RequestMapping("/open/api/v1/user")
+public class UserOpenController {
+
+    private final UserFacade userFacade;
+
+    @GetMapping("/{id}")
+    public Result<UserDTO> getUser(@PathVariable Long id,
+                                   @RequestHeader("X-App-Key") String appKey) {
+        // Open API 需要额外做：签名验证、限流、调用方鉴权
+        return Result.success(userFacade.getUserById(id));
+    }
+}
+```
+
+---
+
+## 整体调用链汇总
+
+```
+【对外提供】
+其他系统 → controller/open → Facade → Service
+
+【对内业务】
+Controller → Service → Manager → Repository → Mapper
+
+【调第三方】
+Service/Manager → integration.XxxService → integration.XxxClient → 第三方
+```
+
+---
+
+## 一句话总结
+
+| 目录 | 解决什么问题 |
+|---|---|
+| `integration/` | 隔离第三方变化，统一做防腐处理 |
+| `facade/` | 控制对外数据边界，不泄露内部实现 |
+| `controller/open/` | Open API 入口，统一做鉴权和限流 |
+
+第三方越多，`integration` 层价值越大；对接系统越多，`facade` 层越不可少。整体还是保持**一层只做一件事**的原则，外包团队照样能理解和落地。
