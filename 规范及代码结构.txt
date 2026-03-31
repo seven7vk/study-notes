@@ -387,3 +387,39 @@ integration  → 外部系统适配（可选）
 方法超过：
 - 50行 → 必须拆
 - 3层if嵌套 → 必须重构
+
+
+🔒 integration 规范
+1. 所有第三方调用必须走 integration 层
+2. Service 禁止直接调用外部 API
+3. integration 必须做 DTO 转换
+4. 禁止将第三方返回对象直接传入业务层
+
+🔒 open 接口规范
+1. 所有对外接口必须放在 controller/open
+2. 必须使用独立 DTO（OpenDTO）
+3. 必须考虑权限/签名/限流
+4. 禁止复用内部接口
+
+🔒 AOP 规范
+1. AOP 统一放在 common/aop 包下
+2. 必须通过自定义注解触发，禁止硬编码切点
+3. AOP 禁止写复杂业务逻辑（只做增强）
+4. AOP 中禁止直接操作数据库
+5. AOP 中捕获异常必须重新抛出，禁止吞异常
+
+common/
+├── aop/
+│   ├── annotation/      ⭐ 自定义注解
+│   │   ├── Log.java
+│   │   ├── AuthCheck.java
+│   │   └── Idempotent.java
+│   │
+│   ├── aspect/          ⭐ 切面实现
+│   │   ├── LogAspect.java
+│   │   ├── AuthAspect.java
+│   │   └── IdempotentAspect.java
+│   │
+│   └── support/         ⭐ 辅助类（可选）
+│       ├── LogContext.java
+│       └── AopUtils.java
