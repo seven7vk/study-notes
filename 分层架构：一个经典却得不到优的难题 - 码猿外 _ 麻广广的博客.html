@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<!-- saved from url=(0049)https://www.maguangguang.xyz/layered-architecture -->
+<html lang="zh" class="light-theme"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover">
+  <link rel="preconnect" href="https://typlog.com/">
+  <link rel="preconnect" href="https://s.typlog.com/">
+  <link rel="preconnect" href="https://i.typlog.com/">
+  <meta name="generator" content="Typlog 3.1">
+  <meta name="provider" content="https://typlog.com">
+    <meta name="theme" content="ginza 0.4.3">
+    <link rel="icon" type="image/x-icon" href="https://i.typlog.com/maguangguang/8350754671_430999.ico">
+    <link rel="apple-touch-icon" href="https://i.typlog.com/maguangguang/8377006844_6987505.png">
+  <title>分层架构：一个经典却得不到优的难题 - 码猿外 | 麻广广的博客</title>
+  <meta name="description" content="软件系统的腐败背后似乎有一双非常有力的手在推动着，即便是简单容易理解的分层架构，在业务需求和技术都快速变更的大背景下，也很难在相对长的时间内做到“优”的水平。作为架构师，更应该保持一个时刻应对变化的心态，带领团队披荆斩棘，解决架构演进路上的各种问题。">
+  <meta name="page:id" content="34644">
+  <meta name="page:slug" content="layered-architecture">
+  <meta name="page:type" content="post">
+      <link rel="amphtml" href="https://www.maguangguang.xyz/amp/34644">
+    <link rel="webmention" href="https://typlog.com/s/maguangguang/webmention">
+  <link rel="canonical" href="https://www.maguangguang.xyz/layered-architecture">
+  <meta property="og:site_name" content="码猿外 | 麻广广的博客">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="分层架构：一个经典却得不到优的难题">
+  <meta property="og:description" content="软件系统的腐败背后似乎有一双非常有力的手在推动着，即便是简单容易理解的分层架构，在业务需求和技术都快速变更的大背景下，也很难在相对长的时间内做到“优”的水平。作为架构师，更应该保持一个时刻应对变化的心态，带领团队披荆斩棘，解决架构演进路上的各种问题。">
+  <meta property="og:url" content="https://www.maguangguang.xyz/layered-architecture">
+    <meta property="og:image" content="https://i.typlog.com/maguangguang/8375280140_3530855.jpg?x-oss-process=style/l">
+      <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@typlog">
+  <script type="text/javascript" async="" src="./分层架构：一个经典却得不到优的难题 - 码猿外 _ 麻广广的博客_files/analytics.js.下载"></script><script type="text/javascript" async="" src="./分层架构：一个经典却得不到优的难题 - 码猿外 _ 麻广广的博客_files/js"></script><script>SITE={"active": true, "base_url": "https://www.maguangguang.xyz/", "icon": "https://i.typlog.com/maguangguang/8377006855_462021.png?x-oss-process=style/ss", "id": 1488, "level": "basic", "name": "\u7801\u733f\u5916 | \u9ebb\u5e7f\u5e7f\u7684\u535a\u5ba2", "slug": "maguangguang", "socials": {"behance": "", "email": "gordon.mgg@qq.com", "github": "lotusp", "instagram": "", "linkedin": "", "telegram": "", "twitter": "maguangguang", "unsplash": "", "vsco": "", "weibo": "CallMe\u5e7f\u5e7f", "zhihu": null}, "subscriber": false}</script>
+    <script async="" src="./分层架构：一个经典却得不到优的难题 - 码猿外 _ 麻广广的博客_files/js(1)"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'G-JYCCJSXWQK');
+    </script>
+<link rel="stylesheet" href="./分层架构：一个经典却得不到优的难题 - 码猿外 _ 麻广广的博客_files/typlog.css">  <style>:root{ --t-rc-primary:18,168,216;--primary-color-hex:#12A8D8;--primary-color-rgb:18,168,216;--t-on-primary:255,255,255;--primary-text-rgb:255,255,255;--t-rc-secondary:0,0,0;--secondary-color-hex:#000;--secondary-color-rgb:0,0,0;--t-on-secondary:255,255,255;--secondary-text-rgb:255,255,255 }</style>
+  <link href="./分层架构：一个经典却得不到优的难题 - 码猿外 _ 麻广广的博客_files/css" rel="stylesheet">
+  <link rel="stylesheet" href="./分层架构：一个经典却得不到优的难题 - 码猿外 _ 麻广广的博客_files/ginza.css">
+  <link rel="preload" href="./分层架构：一个经典却得不到优的难题 - 码猿外 _ 麻广广的博客_files/typlog.js.下载" as="script">
+<script src="./分层架构：一个经典却得不到优的难题 - 码猿外 _ 麻广广的博客_files/index.37d8341f.js.下载"></script></head>
+<body class="win">
+  <div class="head-cover js-cover" data-src="https://i.typlog.com/maguangguang/8375280140_3530855.jpg?x-oss-process=style/l" style="background-image:url(https://i.typlog.com/maguangguang/8375280140_3530855.jpg?x-oss-process=style/l)">
+    <div class="head">
+  <div class="inner">
+    <div class="head_logo">
+      <a href="https://www.maguangguang.xyz/">
+          <img src="./分层架构：一个经典却得不到优的难题 - 码猿外 _ 麻广广的博客_files/8377006855_462021.png" alt="码猿外 | 麻广广的博客">
+        <span>码猿外 | 麻广广的博客</span>
+      </a>
+    </div>
+    <div class="head_subscribe">
+        <button class="js-subscribe">Subscribe</button>
+    </div>
+  </div>
+</div>
+
+    <div class="info">
+      <div class="inner">
+            <div class="info_main">
+    <h1 class="info_title"><a class="h-card" rel="me" href="https://www.maguangguang.xyz/">码猿外 | 麻广广的博客</a></h1>
+      <h2 class="info_subtitle">关注领域：企业架构设计（分布式架构设计、微服务架构设计），企业数字化转型，自我提升及个人成长，读书/学习思考笔记等。功不求戾，但求有恒。</h2>
+    <nav class="info_nav">
+<a href="https://www.maguangguang.xyz/tags/arch-governance/">软件架构治理</a>
+<a href="https://www.maguangguang.xyz/tags/microservices/">微服务</a>
+<a href="https://www.maguangguang.xyz/tags/tech-lead/">Tech Lead</a>
+<a href="https://www.maguangguang.xyz/tags/ee">工程效能</a>
+<a href="https://www.maguangguang.xyz/recommendations">博客推荐</a>
+<a href="https://www.maguangguang.xyz/me">关于我</a>
+    </nav>
+  </div>
+
+      </div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="inner">
+      <article role="main" class="h-entry" itemscope="" itemtype="http://schema.org/Article">
+        <div class="entry-meta">
+            <time class="dt-published" datetime="2021-06-26T15:09:54Z" itemprop="datePublished">Jun 26, 2021</time>
+        </div>
+        <h1 class="p-name" itemprop="headline">分层架构：一个经典却得不到优的难题</h1>
+        <div class="e-content js-content yue" itemprop="articleBody">
+              <h2>经典的分层架构</h2>
+<p>当系统变的复杂，无论是为了便于维护还是为了便于理解，将系统进行分层都是一个经典的操作，这也更贴近人理解事物和拆解问题的方式。</p>
+<p>回顾一些经典的分层架构模型，最贴近用户的层往往提供更高的价值，离用户最远的层往往是更底层的技术实现，如经典的三层架构（表现层、逻辑层、数据访问层）和OSI的七层网络模型（应用层、表示层、会话层、传输层、网络层、数据链路层、物理层）。对用户而言，随着“层距离”的增加，对层的理解难度会逐渐提高，甚至到无法理解。</p>
+<p>分层通过对每层的职责定义以及层与层之间的交互方式定义，让知识在层与层之间做到合理的切割。对不同的用户而言，需要理解的层次是不同的，也就做到了知识的隔离。</p>
+<hr>
+<h2>分层架构实现并不容易</h2>
+<p>分层架构结构简单，非常易于理解，但这样简单的架构实现起来并不那么容易，我们来看两个例子：</p>
+<h3>例子一：越俎代庖</h3>
+<p><img src="./分层架构：一个经典却得不到优的难题 - 码猿外 _ 麻广广的博客_files/8375279940_044187.png" alt="">
+BFF作为分层架构中的一层，一定程度上起到了隔离前端UI展示逻辑和后端业务逻辑的作用，使得前后端都能够独立的演进。BFF通过组合后端业务逻辑接口，实现前端展示需求，这里的重点是 <strong>实现前端展示需求</strong>，那么BFF是否应该组合后端的各种能力，提供一种新的业务能力呢？</p>
+<p>实施落地过程中，为了快速满足一个业务上的需求，BFF作为有着上帝视角的存在，掌握了所有后端业务服务的接口，可以很容易调度能用的后端服务接口有序的完成了业务功能。在这种实现下，BFF这一层的知识就不再限于前端的展示逻辑，还越俎代庖地实现了一些业务逻辑。</p>
+<p>然而，当业务逻辑变更时，很难在后端业务服务中找到全部的逻辑，极端的情况是修改遍布了整个调用链。这种做法显然是不可取的。</p>
+<h3>例子二：臃肿的中间层</h3>
+<p><img src="./分层架构：一个经典却得不到优的难题 - 码猿外 _ 麻广广的博客_files/8375280019_221557.png" alt="">
+这个例子相信大家也不陌生（左侧原图参见<a href="https://martinfowler.com/">Martin Fowler微服务进程内架构设计</a>），我在图中用不同模块的大小来表达每个模块在实现过程中占的比重，虽然老马最初的设计图并无此意图。即便在最初做了各种设计，希望每个模块各司其职，但实现过程中将所有的逻辑写到Service层却是司空见惯，甚至是一定会发生的。</p>
+<p>这些逻辑可能包括对请求参数的校验，对数据模型的转换和拼接，对业务模型属性的操作，对数据库读写的控制，对其他服务调用的控制等等，而这些应该却是其他模块的职责。</p>
+<p>臃肿的中间层把一个服务的进程内代码全部揉在一起，就像一个“大单体”，其他层的组件仅仅是一层薄薄的和其他模块集成的必须代码，这种分层架构几乎等于没有分层，自然无法享有分层带来的任何好处。</p>
+<h3>其他会遇到的问题</h3>
+<p>从上面两个例子来看，无论进程间组件之间，还是进程内组件之间，分层本应该能很好的起到隔离作用，而不好的实现会将这种作用化为乌有。</p>
+<p>不仅如此，层与层的边界不清或交互混乱还会带来很多新的问题（这感觉就像 <a href="https://www.maguangguang.xyz/services-split-in-iterative-development">单体架构拆分成微服务架构</a>，以前不必关心的问题现在却成了难题），典型的问题还有：</p>
+<ul>
+<li><strong>穿透性修改</strong>
+层之间没有做到合理的切割，一个业务功能的实现从最外层一直贯穿到最内层，当业务功能变更时，每层都要做调整才能实现。</li>
+<li><strong>层过多或过少引发的问题</strong>
+这有点像 <a href="https://www.maguangguang.xyz/services-split-in-iterative-development">拆分微服务</a> ，当层过多时，层与层之间的依赖关系很难在设计时理清，交互逻辑复杂，甚至会出现层之间的循环依赖；而过少的层很难起到知识的隔离作用。</li>
+<li><strong>跨层调用让系统丧失进化能力</strong>
+跨层调用不是一定有问题，但我仍然不建议采用跨层调用，特别是一些基础的组件层。一方面跨层调用破坏了架构的统一，也就破坏了知识的边界。另一方面也破坏了层的进化能力。例如希望在某一层增加一些通用逻辑，比如权限校验或缓存时，如果这一层被跳过，这个进化就无法实现。</li>
+</ul>
+<hr>
+<h2>分层架构能做到“优”吗</h2>
+<h3>问题的深层次原因</h3>
+<p>造成上面问题的原因主要是在分层架构中层与层之间没有做到很好的隔离，各层的职责和边界不清晰。在看看能做点什么之前，我们先来探究下其深层次原因：</p>
+<ul>
+<li><strong>架构设计之初并没有严格的层级和边界设计</strong>：
+架构师们通常有意识和能力在开发设计过程中判断每个功能的归属，和每层需要实现的工作。如果这种原则只存在于架构师的头脑中，而没有在团队内形成共识，完全依赖每个开发人员的经验和对当前架构的理解，就会不受控，很容易演变成层与层之间只是物理代码的隔离，逻辑上却严重耦合。</li>
+<li><strong>有层级设计，但每层的职责设计难以支撑业务演进</strong>：
+以微服务为例，如何设计微服务，不同的架构师观点也不尽相同。在我经历的项目里，有些微服务曾被设计成了”贫血“的服务，服务端仅保存了实体模型和简单的逻辑，如果要实现复杂的业务功能，需要由前端来实现；
+这种设计给我们带来了很多运维上的问题，当前端不止一端时，相似的功能需要在每一端都实现一次。当某一端的实现有调整时（特别是不同的端由不同团队维护时），跨前端的逻辑不一致，导致后端数据在两个端相互覆盖。
+可以看到，层的职责是会相互影响的，如果某一层没有承担起它该有的责任，其他层只能把这个责任担起来，从而引入不必要的问题。</li>
+<li><strong>开发团队的认知水平和协作水平低下</strong>：
+软件开发是一个团队协作共同创作的过程，如果在每个阶段都完全依靠每个个体的能力，软件的架构和质量取决于团队内最差的个体的能力和认知水平。这也是我在标题上写分层架构是“<strong>经典却很得不到优</strong>”的原因。
+架构设计只是个开始，能否把架构按设计完美的实现才是关键。就像我们从来不缺创业的点子，缺的是把点子真正落地的实力。</li>
+</ul>
+<h3>我们能做点什么</h3>
+<div class="blockquote"><blockquote><p>软件架构的终极目标是，用最小的人力成本来满足构建和维护该系统的需求。 —— 《架构整洁之道》</p>
+</blockquote></div>
+<p>为了实现这个目标，开发团队需要做到以下几点来消灭经典的分层架构在落地过程中产生的问题：</p>
+<ol>
+<li><p><strong>合理设计分层，清晰定义每层的职责</strong>
+这一点毋庸置疑。但我要强调的是，这个设计要是全团队的共识，是顶在开发团队头上的第一个原则，任何的架构变更都要回到这里，来审视是否破坏了最初的设计原则。</p>
+</li>
+<li><p><strong>通过技术手段守护架构</strong>
+当定义清楚了分层架构，必然也就有了分层的一些原则，在《演进式架构》中推荐尽早确定系统的适应度函数，并定期的审查，根据业务和技术的需求修改当前的适应度函数或增加新的适应度函数，已保证架构能够按照设计的方向发展。</p>
+</li>
+</ol>
+<p>在进程内，有一些自动化工具可以通过测试的方式来验证代码的架构是否遵循了预先设计的原则（如<a href="https://www.archunit.org/">ArchUnit</a>），可以高效的帮团队识别出在开发过程中破坏原则的代码实现。</p>
+<ol start="3">
+<li><strong>提升团队整体认知水平和协作水平</strong>
+在团队不断成熟的过程中，很难保证所有的开发人员都能够有能力守护架构，因此除了通过技术手段守护架构，也非常有必要采取一定的手段来提升整个团队的认知水平和协作水平。</li>
+</ol>
+<p>首先可以在团队内建立架构评审委员会，关于架构的关键决策需要由这个团队来拍板，而不是每个开发人员都可以决策。另外在做详细的实现设计时，要由有经验有能力守护架构的同学进行设计，并将工作内容拆分成更加可操作的Task。通过这种方式将整个团队的认知水平底线提升到可以守护架构的程度。</p>
+<hr>
+<h2>结语</h2>
+<p>软件系统的腐败背后似乎有一双非常有力的手在推动着，即便是简单容易理解的分层架构，在业务需求和技术都快速变更的大背景下，也很难在相对长的时间内做到“优”的水平。作为架构师，更应该保持一个时刻应对变化的心态，带领团队披荆斩棘，解决架构演进路上的各种问题。</p>
+<hr>
+<h4>相关文章推荐</h4>
+<ul>
+<li><a href="https://www.maguangguang.xyz/architecture-chaos-mystery">架构混沌之谜</a></li>
+<li><a href="https://www.maguangguang.xyz/identify-and-locate-software-architecture-issues">如何识别和定位架构问题</a></li>
+<li><a href="https://www.maguangguang.xyz/architecture-optimization-topics">架构优化方向</a></li>
+<li><a href="https://www.maguangguang.xyz/tech-debt-quadrant">技术债的前世今生</a></li>
+<li><a href="https://www.maguangguang.xyz/apply-chaos-engineering-in-architecture-governance">软件架构治理与混沌工程</a></li>
+<li><a href="https://www.maguangguang.xyz/bff-governance">BFF治理与优化实践</a></li>
+</ul>
+
+    
+      <div itemprop="image" itemscope="" itemtype="https://schema.org/ImageObject">
+      <meta itemprop="url" content="https://i.typlog.com/maguangguang/8375280140_3530855.jpg">
+        <meta itemprop="width" content="6000">
+        <meta itemprop="height" content="3376">
+    </div>
+    <meta itemprop="dateModified" content="2022-05-15T06:19:07Z">
+  <div itemprop="publisher" itemscope="" itemtype="https://schema.org/Organization">
+      <div itemprop="logo" itemscope="" itemtype="https://schema.org/ImageObject">
+        <meta itemprop="url" content="https://i.typlog.com/maguangguang/8377006855_462021.png">
+        <meta itemprop="width" content="512">
+        <meta itemprop="height" content="512">
+      </div>
+    <meta itemprop="name" content="码猿外 | 麻广广的博客">
+    <meta itemprop="url" content="https://www.maguangguang.xyz/">
+  </div>
+
+
+        </div>
+          <div class="entry-tags">
+              <a class="p-category" href="https://www.maguangguang.xyz/tags/architecture/">架构设计</a>
+              <a class="p-category" href="https://www.maguangguang.xyz/tags/arch-governance/">软件架构治理</a>
+          </div>
+              <div class="entry-authors">
+        <div class="p-author h-card" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <a href="https://www.maguangguang.xyz/by/guangguang/" class="author_image">
+        <img class="u-photo" itemprop="image" src="./分层架构：一个经典却得不到优的难题 - 码猿外 _ 麻广广的博客_files/8322101302_795692.png" alt="麻广广" width="48" height="48">
+      </a>
+    <div class="author_main">
+      <div class="author_meta">
+        <strong class="p-name" itemprop="name">
+          <a href="https://www.maguangguang.xyz/by/guangguang/" class="u-url">麻广广</a>
+        </strong>
+      </div>
+        <div class="author_bio" itemprop="description"><p>功不求戾，但求有恒</p>
+</div>
+    </div>
+  </div>
+
+  </div>
+
+
+                <div class="entry-license" itemscope="" itemtype="https://schema.org/CreativeWork">
+      <a class="license_name" rel="license" itemprop="license" href="https://wikipedia.org/wiki/Copyright" target="_blank"><span>All rights reserved</span></a>
+      <div class="license_description" itemprop="usageInfo">Except where otherwise noted, content on this page is copyrighted.</div>
+  </div>
+
+
+      </article>
+      <div class="entry-block">
+<div class="entry-enjoy">
+  <button class="enjoy js-enjoy">Enjoy<i>1</i></button>
+</div>
+<div class="entry-share">
+  <a class="js-share" data-type="tw" href="https://www.maguangguang.xyz/layered-architecture#" aria-label="Share to Twitter"><i class="icon icon-twitter"></i></a>
+    <a class="js-share" data-type="wb" href="https://www.maguangguang.xyz/layered-architecture#" aria-label="分享到微博"><i class="icon icon-weibo"></i></a>
+    <a class="js-share" data-type="wx" href="https://www.maguangguang.xyz/layered-architecture#" aria-label="分享到微信"><i class="icon icon-wechat"></i></a>
+  <a class="js-share" data-type="tg" href="https://www.maguangguang.xyz/layered-architecture#" aria-label="Share to Telegram">
+    <i class="icon icon-telegram"></i></a>
+</div>      </div>
+    </div>
+
+  <div class="entry-section sponsorship">
+    <div class="inner">
+    </div>
+  </div>
+
+
+    <section class="entry-section prev-subject">
+      <div class="inner">
+          <h2>Read This</h2>
+          <div class="item" lang="zh">
+            <a class="item-main" href="https://www.maguangguang.xyz/be-with-system">
+              <h3>与系统共舞 - 跟上系统的节拍</h3>
+            </a>
+          </div>
+      </div>
+    </section>
+
+  <section class="entry-section comment">
+    <div class="inner">
+        <div id="comment_thread"><tc-comment site-id="1488" page-id="34644"><template shadowrootmode="open"><!---->
+      <div class="tabs" part="tabs" role="tablist">
+        <button type="button" role="tab" aria-label="Comments" aria-selected="true">
+          <!--?lit$8548723866$--><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          <span><!--?lit$8548723866$-->3</span>
+        </button>
+        <button type="button" role="tab" aria-label="Likes" aria-selected="false">
+          <!--?lit$8548723866$--><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+          <span><!--?lit$8548723866$-->0</span>
+        </button>
+        <button type="button" role="tab" aria-label="Reposts" aria-selected="false">
+          <!--?lit$8548723866$--><svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
+          <span><!--?lit$8548723866$-->0</span>
+        </button>
+      </div>
+      <!--?lit$8548723866$-->
+      <!--?lit$8548723866$--><tc-comment-reply><template shadowrootmode="open"><!---->
+      <form method="post">
+        <textarea name="content" required="" placeholder="留下你的想法..."></textarea>
+        <!--?lit$8548723866$-->
+          <div class="login">
+            <input name="author_name" required="" placeholder="名字" value="">
+            <input type="email" name="email" required="" placeholder="電子郵件" value="">
+            <button type="button">(<!--?lit$8548723866$-->我有 Typlog 帳號)</button>
+          </div>
+        
+        <div class="foot">
+          <!--?lit$8548723866$-->
+          <div class="submit">
+            <label>
+              <input type="checkbox" name="receive_email">
+              <span><!--?lit$8548723866$-->收到回覆後郵件通知我</span>
+            </label>
+            <button type="submit"><!--?lit$8548723866$-->留言</button>
+          </div>
+        </div>
+      </form>
+    </template></tc-comment-reply>
+      <div class="comments" part="comments">
+      <!--?lit$8548723866$--><!----><tc-comment-item part="comment"><template shadowrootmode="open"><!---->
+      <div class="comment" data-id="2337">
+      <div class="head">
+        <!--?lit$8548723866$-->
+      <div class="avatar">
+        <!--?lit$8548723866$-->
+    <picture>
+      <source type="image/webp" srcset="https://gravatar.webp.se/avatar/5b473460c252a5d3c42c8fdb8a98a747?s=40&amp;d=robohash, https://gravatar.webp.se/avatar/5b473460c252a5d3c42c8fdb8a98a747?s=80&amp;d=robohash 2x, https://gravatar.webp.se/avatar/5b473460c252a5d3c42c8fdb8a98a747?s=120&amp;d=robohash 3x, https://gravatar.webp.se/avatar/5b473460c252a5d3c42c8fdb8a98a747?s=160&amp;d=robohash 4x">
+      <img referrerpolicy="no-referrer" src="https://www.gravatar.com/avatar/5b473460c252a5d3c42c8fdb8a98a747?s=80&amp;d=robohash" srcset="https://www.gravatar.com/avatar/5b473460c252a5d3c42c8fdb8a98a747?s=40&amp;d=robohash, https://www.gravatar.com/avatar/5b473460c252a5d3c42c8fdb8a98a747?s=80&amp;d=robohash 2x, https://www.gravatar.com/avatar/5b473460c252a5d3c42c8fdb8a98a747?s=120&amp;d=robohash 3x, https://www.gravatar.com/avatar/5b473460c252a5d3c42c8fdb8a98a747?s=160&amp;d=robohash 4x" alt="Tom">
+    </picture>
+        <!--?lit$8548723866$-->
+      </div>
+      <div class="info">
+        <!--?lit$8548723866$--><span><!--?lit$8548723866$-->Tom</span>
+        <!--?lit$8548723866$--><time class="time" datetime="2022-04-19T03:38:16.753890Z"><!--?lit$8548723866$-->2022-04-19</time>
+      </div>
+    
+      </div>
+      <div class="content"><p>Typo: ** 实现前端展示需求** -&gt; **实现前端展示需求**</p></div>
+      <!--?lit$8548723866$-->
+      <div class="foot">
+        <!--?lit$8548723866$--><button class="reply" aria-label="Reply to this comment">
+          <!--?lit$8548723866$--><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          <!--?lit$8548723866$--><span><!--?lit$8548723866$-->1條回覆</span>
+        </button>
+      </div>
+      <!--?lit$8548723866$-->
+          <div class="children">
+          <!--?lit$8548723866$--><!----><tc-comment-item><template shadowrootmode="open"><!---->
+      <div class="comment" data-id="2359">
+      <div class="head">
+        <!--?lit$8548723866$-->
+      <div class="avatar">
+        <!--?lit$8548723866$-->
+    <picture>
+      <source type="image/webp" srcset="https://i.typlog.com/u/1722/8396923405_119742.jpg?x-oss-process=image/auto-orient,1/interlace,1/quality,q_90/resize,m_fill,w_40,h_40/format,webp, https://i.typlog.com/u/1722/8396923405_119742.jpg?x-oss-process=image/auto-orient,1/interlace,1/quality,q_90/resize,m_fill,w_80,h_80/format,webp 2x, https://i.typlog.com/u/1722/8396923405_119742.jpg?x-oss-process=image/auto-orient,1/interlace,1/quality,q_90/resize,m_fill,w_120,h_120/format,webp 3x, https://i.typlog.com/u/1722/8396923405_119742.jpg?x-oss-process=image/auto-orient,1/interlace,1/quality,q_90/resize,m_fill,w_160,h_160/format,webp 4x">
+      <img referrerpolicy="no-referrer" src="https://i.typlog.com/u/1722/8396923405_119742.jpg?x-oss-process=image/auto-orient,1/interlace,1/quality,q_90/resize,m_fill,w_80,h_80" srcset="https://i.typlog.com/u/1722/8396923405_119742.jpg?x-oss-process=image/auto-orient,1/interlace,1/quality,q_90/resize,m_fill,w_40,h_40, https://i.typlog.com/u/1722/8396923405_119742.jpg?x-oss-process=image/auto-orient,1/interlace,1/quality,q_90/resize,m_fill,w_80,h_80 2x, https://i.typlog.com/u/1722/8396923405_119742.jpg?x-oss-process=image/auto-orient,1/interlace,1/quality,q_90/resize,m_fill,w_120,h_120 3x, https://i.typlog.com/u/1722/8396923405_119742.jpg?x-oss-process=image/auto-orient,1/interlace,1/quality,q_90/resize,m_fill,w_160,h_160 4x" alt="Ma Guangguang">
+    </picture>
+        <!--?lit$8548723866$-->
+      </div>
+      <div class="info">
+        <!--?lit$8548723866$--><span><!--?lit$8548723866$-->Ma Guangguang</span>
+        <!--?lit$8548723866$--><time class="time" datetime="2022-04-20T02:18:54.569131Z"><!--?lit$8548723866$-->2022-04-20</time>
+      </div>
+    
+      </div>
+      <div class="content"><p>已更新，多谢提醒</p></div>
+      <!--?lit$8548723866$-->
+      <div class="foot">
+        <!--?lit$8548723866$--><button class="reply" aria-label="Reply to this comment">
+          <!--?lit$8548723866$--><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          <!--?lit$8548723866$--><span><!--?lit$8548723866$-->留言</span>
+        </button>
+      </div>
+      <!--?lit$8548723866$-->
+      <!--?lit$8548723866$-->
+      </div>
+    </template></tc-comment-item><!---->
+          <!--?lit$8548723866$-->
+          </div>
+        
+      <!--?lit$8548723866$-->
+      </div>
+    </template></tc-comment-item><!----><!----><tc-comment-item part="comment"><template shadowrootmode="open"><!---->
+      <div class="comment" data-id="2356">
+      <div class="head">
+        <!--?lit$8548723866$-->
+      <div class="avatar">
+        <!--?lit$8548723866$-->
+    <picture>
+      <source type="image/webp" srcset="https://gravatar.webp.se/avatar/05816183d532cd8ebb43816a6c60c002?s=40&amp;d=robohash, https://gravatar.webp.se/avatar/05816183d532cd8ebb43816a6c60c002?s=80&amp;d=robohash 2x, https://gravatar.webp.se/avatar/05816183d532cd8ebb43816a6c60c002?s=120&amp;d=robohash 3x, https://gravatar.webp.se/avatar/05816183d532cd8ebb43816a6c60c002?s=160&amp;d=robohash 4x">
+      <img referrerpolicy="no-referrer" src="https://www.gravatar.com/avatar/05816183d532cd8ebb43816a6c60c002?s=80&amp;d=robohash" srcset="https://www.gravatar.com/avatar/05816183d532cd8ebb43816a6c60c002?s=40&amp;d=robohash, https://www.gravatar.com/avatar/05816183d532cd8ebb43816a6c60c002?s=80&amp;d=robohash 2x, https://www.gravatar.com/avatar/05816183d532cd8ebb43816a6c60c002?s=120&amp;d=robohash 3x, https://www.gravatar.com/avatar/05816183d532cd8ebb43816a6c60c002?s=160&amp;d=robohash 4x" alt="aaa">
+    </picture>
+        <!--?lit$8548723866$-->
+      </div>
+      <div class="info">
+        <!--?lit$8548723866$--><span><!--?lit$8548723866$-->aaa</span>
+        <!--?lit$8548723866$--><time class="time" datetime="2022-04-19T12:27:49.775707Z"><!--?lit$8548723866$-->2022-04-19</time>
+      </div>
+    
+      </div>
+      <div class="content"><p>正确的废话</p></div>
+      <!--?lit$8548723866$-->
+      <div class="foot">
+        <!--?lit$8548723866$--><button class="reply" aria-label="Reply to this comment">
+          <!--?lit$8548723866$--><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          <!--?lit$8548723866$--><span><!--?lit$8548723866$-->留言</span>
+        </button>
+      </div>
+      <!--?lit$8548723866$-->
+      <!--?lit$8548723866$-->
+      </div>
+    </template></tc-comment-item><!---->
+      <!--?lit$8548723866$-->
+      </div>
+      <div class="powered-by">Powered by <a href="https://typlog.com/">Typlog</a>.</div>
+    </template></tc-comment></div>
+    </div>
+  </section>
+  </div>
+<div class="site-foot">
+  <div class="site-foot_content">
+    <div class="site-foot_home">
+        <a class="logo" href="https://www.maguangguang.xyz/">
+          <img src="./分层架构：一个经典却得不到优的难题 - 码猿外 _ 麻广广的博客_files/8377006855_462021(1).png" alt="码猿外 | 麻广广的博客 logo" height="32">
+        </a>
+    </div>
+    <div class="site-foot_links">
+      <a href="https://www.maguangguang.xyz/archive/">Archive</a>
+    </div>
+  </div>
+</div><div class="typlog-foot">
+  <div>Powered by <a class="title" href="https://typlog.com/?utm_source=maguangguang&amp;utm_medium=foot">Typlog</a></div>
+</div><script async="" src="./分层架构：一个经典却得不到优的难题 - 码猿外 _ 麻广广的博客_files/typlog.js.下载"></script>
+<div id="give-freely-root-bcjindcccaagfpapjjmafapmmgkkhgoa" class="give-freely-root" data-extension-id="bcjindcccaagfpapjjmafapmmgkkhgoa" data-extension-name="JSON Formatter" style="display: block;"><template shadowrootmode="open"><style>
+  :host {
+    all: initial;
+  }
+
+  .gf-scroll-remove::-webkit-scrollbar {
+    border-radius-bottom-right: 15px;
+  }
+
+  button {
+    cursor: pointer;
+    transition: transform 0.1s ease;
+  }
+
+  button:active {
+    transform: scale(0.98);
+  }
+
+  .give-freely-close-button:hover {
+    opacity: 0.7;
+  }
+
+  input[type="radio"] {
+    margin-right: 8px;
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid #e5e5e5;
+    margin: 1em 0;
+  }
+
+  dialog::backdrop  {
+    background-color: revert;
+  }
+
+  dialog.backdrop-hidden::backdrop  {
+    background-color: transparent;
+  }
+</style><div><div class="gf-app"></div></div></template></div></body></html>
